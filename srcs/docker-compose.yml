@@ -1,0 +1,77 @@
+version: '3'
+
+volumes:
+  wp:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: /home/merkol/data/wp
+  db:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: /home/merkol/data/db
+
+networks:
+  wp:
+    driver: bridge
+    
+services:
+  mariadb:
+    container_name: mariadb
+    networks:
+      - wp
+    build:
+      context: ./db
+      dockerfile: Dockerfile
+      args:
+        DB_NAME: $MYSQL_DB
+        DB_USER: $MYSQL_USER
+        DB_PASSWORD: $MYSQL_PASSWORD
+        DB_ROOT_PASSWORD: $MYSQL_ROOT_PASSWORD
+    ports:
+      - "3306:3306"
+    env_file:
+      - .env
+    volumes:
+      - /home/merkol/data/db:/home/data
+    restart: always
+    tty: true
+
+  nginx:
+    container_name: nginx
+    depends_on:
+      - wordpress
+    networks:
+      - wp
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    ports:
+      - "443:443"
+    restart: always
+    volumes:
+      - wp:/var/www/html
+    tty: true
+
+  wordpress:
+    container_name: wordpress
+    depends_on:
+      - mariadb
+    networks:
+      - wp
+    build:
+      context: ./wp
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    ports:
+      - "9000:9000"
+    volumes:
+      - wp:/var/www/html
+    restart: always
+    tty: true
