@@ -9,12 +9,15 @@ re: fclean dir
 clean:
 	docker-compose -f srcs/docker-compose.yml --env-file=srcs/.env down --remove-orphans -v
 fclean: clean
-	cd ${HOME}/data && sudo rm -rf *
-	docker system prune -afd
+	docker system prune -af
 	docker container prune -f
 	docker image prune -af
 	docker builder prune --all --force
+	if [ -d "/root/data" ]; then \
+		cd /root/data && rm -rf * \
+	fi
 dir:
+	mkdir -p /root/data
 	sudo mkdir -p ${DATA_DIR}/wp
 	sudo mkdir -p ${DATA_DIR}/db
 	echo ${HOSTNAME}| sudo tee -a /etc/hosts
