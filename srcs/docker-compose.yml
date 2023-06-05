@@ -16,11 +16,13 @@ volumes:
 
 networks:
   wp:
+    name: my_network
     driver: bridge
-    
+
 services:
   mariadb:
     container_name: mariadb
+    image: mariadb
     networks:
       - wp
     build:
@@ -42,6 +44,7 @@ services:
 
   nginx:
     container_name: nginx
+    image: nginx
     depends_on:
       - wordpress
     networks:
@@ -60,6 +63,7 @@ services:
 
   wordpress:
     container_name: wordpress
+    image: wordpress
     depends_on:
       - mariadb
     networks:

@@ -1,15 +1,23 @@
 #!/bin/sh
 
-mkdir -p /run/php && chown -R www-data:www-data /run/php
+	sed -i "s/listen = \/run\/php\/php7.3-fpm.sock/listen = 9000/" "/etc/php/7.3/fpm/pool.d/www.conf";
+	chown -R www-data:www-data /var/www/*;
+	chown -R 755 /var/www/*;
+	mkdir -p /run/php/;
+	touch /run/php/php7.3-fpm.pid;
 
-wp core download --allow-root
+if [ ! -f /var/www/html/wp-config.php ]; then
+	mkdir -p /run/php && chown -R www-data:www-data /run/php
 
-wp config create --allow-root --dbname=${MYSQL_DB} --dbuser=${MYSQL_USER} --dbpass=${MYSQL_PASSWORD} --dbhost=${MYSQL_HOST} --dbcharset=utf8 
+	wp core download --allow-root
 
-wp core install --url=localhost --title='Inception' --admin_user=${WP_ADMIN_USER} --admin_email=${WP_ADMIN_EMAIL} --admin_password=${WP_ADMIN_PASSWORD} --allow-root
+	wp config create --allow-root --dbname=${MYSQL_DB} --dbuser=${MYSQL_USER} --dbpass=${MYSQL_PASSWORD} --dbhost=${MYSQL_HOST} --dbcharset=utf8 
 
-wp theme install bizboost --activate --allow-root
+	wp core install --url=localhost --title='Inception' --admin_user=${WP_ADMIN_USER} --admin_email=${WP_ADMIN_EMAIL} --admin_password=${WP_ADMIN_PASSWORD} --allow-root
 
-wp user create ${WP_USER} ${WP_EMAIL} --role=contributor --first_name=${WP_USER} --last_name=${WP_USER} --user_pass=${WP_PASSWORD} --allow-root
+	wp theme install bizboost --activate --allow-root
 
-wp db optimize --allow-root
+	wp user create ${WP_USER} ${WP_EMAIL} --role=contributor --first_name=${WP_USER} --last_name=${WP_USER} --user_pass=${WP_PASSWORD} --allow-root
+
+	wp db optimize --allow-root
+fi
